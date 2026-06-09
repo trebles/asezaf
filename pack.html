@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Agent Script, easy as Force</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;450;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="wrap"><div id="app" class="trainer"></div></div>
+
+<script src="assets/store.js"></script>
+<script src="data/manifest.js"></script>
+<script>
+(function () {
+  var app = document.getElementById("app");
+  function fail(msg) {
+    app.innerHTML =
+      '<a class="back" href="index.html">\u2190 All packs</a>' +
+      '<div class="errbox"><h2>Pack not found</h2><p>' + msg + '</p>' +
+      '<a class="btn" href="index.html">Back to all packs</a></div>';
+  }
+
+  // Prefer the hash (survives clean-URL redirects on any host); fall back to ?p=
+  var id = decodeURIComponent((location.hash || "").replace(/^#/, "")) ||
+           new URLSearchParams(location.search).get("p") || "";
+  // Only allow safe ids that exist in the manifest.
+  var known = (window.DECKS || []).some(function (d) { return d.id === id; });
+  if (!/^[a-z0-9-]+$/.test(id) || !known) {
+    fail("Pick a pack from the home page to get started.");
+    return;
+  }
+  window.__DECK_ID__ = id;
+
+  var data = document.createElement("script");
+  data.src = "data/" + id + ".js";
+  data.onload = function () {
+    var eng = document.createElement("script");
+    eng.src = "assets/engine.js";
+    document.body.appendChild(eng);
+  };
+  data.onerror = function () { fail("This pack\u2019s cards couldn\u2019t be loaded."); };
+  document.head.appendChild(data);
+})();
+</script>
+</body>
+</html>
